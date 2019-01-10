@@ -9,7 +9,7 @@ class App extends Component {
     <Router>
       <Fragment>
       <Route exact path="" component={Fases}></Route>
-      <Route path="/Play" component={Play}></Route>
+      <Route path="/Play/:level" component={Play}></Route>
       </Fragment>
     </Router>
   )

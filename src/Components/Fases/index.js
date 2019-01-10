@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 import { GoldenStar, DarkStar } from "../utils";
+import { withRouter } from "react-router-dom";
 import * as Levels from "../../Model/Levels";
 import "./index.scss";
 
-export default class Fases extends Component {
+class Fases extends Component {
     renderStar = (fase, indexStar) => 
         this.getConquer(fase) && this.getConquer(fase).stars >= indexStar ? <GoldenStar key={indexStar} /> : <DarkStar key={indexStar} />;
 
@@ -12,9 +13,10 @@ export default class Fases extends Component {
     renderFase = fase => {
         const levelActive = Math.max(...Levels.getConquers().filter(a => a.dif === Levels.getDificulty()).map(a => a.nivel)) + 1 >= fase.nivel || fase.nivel === 0
         const classLevel = `fase ${levelActive ? "" : "desativado"}`;
-        
+        const handleClick = levelActive ? () => this.props.history.push(`/Play/${fase.nivel}`) : () => {};
+
         return (
-            <div key={fase.nivel} className={classLevel} ng-click="ctrl.setLevel(f)">
+            <div key={fase.nivel} className={classLevel} onClick={handleClick.bind(this, fase)}>
                 <div className="stars">
                     {[1,2,3].map(i => this.renderStar(fase, i))}
                 </div>
@@ -56,3 +58,5 @@ export default class Fases extends Component {
         )
     };
 }
+
+export default withRouter(Fases);
