@@ -129,3 +129,10 @@ const nivelFactory = (jogo: Jogos): () => void => {
     }
 }
 const randomNum = (max: number, min: number) => Math.round(Math.random() * (max - min) + min);
+
+
+export const getConquers = (): fase[] => JSON.parse(localStorage["conquers"] || "[]");
+export const setConquers = (lst: fase[]) => localStorage.setItem("conquers", JSON.stringify(lst));
+
+export const getDificulty = (): dificuldades => JSON.parse(localStorage["dificulty"] || JSON.stringify(dificuldades.easy));
+export const setDificulty = (obj: dificuldades) => localStorage.setItem("dificulty", JSON.stringify(obj));
