@@ -2,12 +2,12 @@
 export enum op { soma, subtracao, multiplicacao, divisao };
 export enum dificuldades { easy, medium, hard };
 
-export type questao = {
-    valor1: number;
-    valor2: number;
-    operador: op;
-    resposta: number;
-    pontos: number;
+export type question = {
+    firstValue: number;
+    secondValue: number;
+    operation: op;
+    answer: number;
+    score: number;
 }
 
 export type fase = {
@@ -18,88 +18,88 @@ export type fase = {
 }
 
 export interface Jogos{
-    questoes: questao[];
+    questoes: question[];
     nivel: number;
     gerarPergunta: () => void;
-    getQuestion: () => questao;
-    questaoAnteriorIgual: () => boolean;
+    getQuestion: () => question;
+    questionAnteriorIgual: () => boolean;
 }
 
-const qtdPerguntasPorNivel = 10;
-const qtdTentativas = 9999;
-const qtdErrosAceitaveis = 2;
+export const qtdPerguntasPorNivel = 10;
+export const qtdTentativas = 9999;
+export const qtdErrosAceitaveis = 2;
 
 
-const forSub = (q: questao) => {
-    if(q.valor1 > q.valor2 || q.operador !== op.subtracao) return;
-    const c = q.valor1;
-    q.valor1 = q.valor2;
-    q.valor2 = c;
+const forSub = (q: question) => {
+    if(q.firstValue > q.secondValue || q.operation !== op.subtracao) return;
+    const c = q.firstValue;
+    q.firstValue = q.secondValue;
+    q.secondValue = c;
 } 
 
-const nivel1Valores = (): questao => {
-    const gerarValores = (): questao => ({
-        valor1: randomNum(1, 10),
-        valor2: randomNum(1, 10)
-    } as questao)
+const nivel1Valores = (): question => {
+    const gerarValores = (): question => ({
+        firstValue: randomNum(1, 10),
+        secondValue: randomNum(1, 10)
+    } as question)
     let q = gerarValores();
     let count = 0;
-    while(q.valor2+q.valor1 > 9 && count < qtdTentativas){
+    while(q.secondValue+q.firstValue > 9 && count < qtdTentativas){
         gerarValores();
         count++;
     }
     return q;
 }
 
-const nivel2Valores = (): questao => ({
-    valor1: randomNum(1, 10),
-    valor2: randomNum(1, 10)
-} as questao);
+const nivel2Valores = (): question => ({
+    firstValue: randomNum(1, 10),
+    secondValue: randomNum(1, 10)
+} as question);
 
-const nivel3Valores = (): questao => ({
-    valor1: randomNum(10, 20),
-    valor2: randomNum(5, 10)
-} as questao);
+const nivel3Valores = (): question => ({
+    firstValue: randomNum(10, 20),
+    secondValue: randomNum(5, 10)
+} as question);
 
-const nivel4Valores = (): questao => ({
-    valor1: randomNum(10, 20),
-    valor2: randomNum(10, 20)
-} as questao);
+const nivel4Valores = (): question => ({
+    firstValue: randomNum(10, 20),
+    secondValue: randomNum(10, 20)
+} as question);
 
-const nivel5Valores = (): questao => ({
-    valor1: randomNum(15, 20),
-    valor2: randomNum(15, 20)
-} as questao);
+const nivel5Valores = (): question => ({
+    firstValue: randomNum(15, 20),
+    secondValue: randomNum(15, 20)
+} as question);
 
-const nivel6Valores = (): questao => ({
-    valor1: randomNum(15, 25),
-    valor2: randomNum(15, 25)
-} as questao);
+const nivel6Valores = (): question => ({
+    firstValue: randomNum(15, 25),
+    secondValue: randomNum(15, 25)
+} as question);
 
-const nivel7Valores = (): questao => ({
-    valor1: randomNum(11, 50),
-    valor2: randomNum(11, 50)
-} as questao)
+const nivel7Valores = (): question => ({
+    firstValue: randomNum(11, 50),
+    secondValue: randomNum(11, 50)
+} as question)
 
-const nivel8Valores = (): questao => ({
-    valor1: randomNum(11, 99),
-    valor2: randomNum(11, 99)
-} as questao);
+const nivel8Valores = (): question => ({
+    firstValue: randomNum(11, 99),
+    secondValue: randomNum(11, 99)
+} as question);
 
-const nivel9Valores = (): questao => ({
-    valor1: randomNum(11, 150),
-    valor2: randomNum(11, 50)
-} as questao);
+const nivel9Valores = (): question => ({
+    firstValue: randomNum(11, 150),
+    secondValue: randomNum(11, 50)
+} as question);
 
-const nivel10Valores = (): questao => ({
-    valor1: randomNum(11, 150),
-    valor2: randomNum(11, 99)
-} as questao)
+const nivel10Valores = (): question => ({
+    firstValue: randomNum(11, 150),
+    secondValue: randomNum(11, 99)
+} as question)
 
-const nivel11Valores = (): questao => ({
-    valor1: randomNum(100, 300),
-    valor2: randomNum(100, 300)
-} as questao)
+const nivel11Valores = (): question => ({
+    firstValue: randomNum(100, 300),
+    secondValue: randomNum(100, 300)
+} as question)
 
 export const optValores = [ 
     nivel1Valores, 
@@ -115,16 +115,16 @@ export const optValores = [
     nivel11Valores,
 ];
 
-const valoresFactory = (nivel: number): questao => optValores[nivel]();
+const valoresFactory = (nivel: number): question => optValores[nivel]();
 
 const nivelFactory = (jogo: Jogos): () => void => {
     if(jogo.nivel >= optValores.length * 3) return () => {};
     return () => {
         const q = jogo.getQuestion();
         const values = valoresFactory(jogo.nivel % optValores.length);
-        q.valor1 = values.valor1;
-        q.valor2 = values.valor2;
-        q.operador = Math.floor(jogo.nivel / optValores.length);
+        q.firstValue = values.firstValue;
+        q.secondValue = values.secondValue;
+        q.operation = Math.floor(jogo.nivel / optValores.length);
         forSub(q);
     }
 }

@@ -1,0 +1,85 @@
+.play{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 80vh;
+    padding: 16px 24px;
+
+    .statusBar{
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        align-self: flex-start;
+        i{
+            font-size: 28px;
+        }
+        .stars{
+            i{
+                color: #666;
+
+                &.golden{
+                    color: gold;
+                }
+            }
+        }
+        span{
+            color: aqua;
+            font-size: 24px;
+            font-weight: 100;
+        }
+    }
+
+    .game{
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        flex-direction: column;
+        height: 90%;
+
+        .timeBar{
+            width: 60vw;
+            height: 20px;
+            border: 2px solid white;
+            border-radius: 3px;
+
+            .filled{
+                height: 18px;
+                background: white;
+            }
+        }
+
+        .operacao {
+            display: flex;
+            flex-direction: column;
+        
+            .conta {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                font-size: x-large;
+            }
+
+            input{
+                margin-top:20px;
+                background: #333;
+                color: white;
+                text-align: center;
+            }
+        }
+        .feedback{
+            display: flex;
+            justify-content: space-around;
+            width: 70vw;
+
+            .red{
+                color: #ff1414;
+            }
+            .green{
+                color: greenyellow;
+            }
+        }
+    }
+}
