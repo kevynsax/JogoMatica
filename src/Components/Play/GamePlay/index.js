@@ -67,7 +67,7 @@ class GamePlay extends Component {
         ].find(a => a.op === operation).answer;
 
     componentWillUnmount = () => clearImmediate(this.intervalObject);
-    setupTimer = () => this.intervalObject = setInterval(() => this.setState({}, () => console.log("passou pelo interval")), 1111500);
+    setupTimer = () => this.intervalObject = setInterval(() => this.setState({}, () => console.log("passou pelo interval")), 500);
 
     renderTimeBar = () => {
         const { level, timeHasStarted } = this.state;
