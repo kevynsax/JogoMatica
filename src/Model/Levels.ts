@@ -7,7 +7,6 @@ export type question = {
     secondValue: number;
     operation: op;
     answer: number;
-    score: number;
 }
 
 export type fase = {
@@ -17,18 +16,9 @@ export type fase = {
     stars: number
 }
 
-export interface Jogos{
-    questoes: question[];
-    nivel: number;
-    gerarPergunta: () => void;
-    getQuestion: () => question;
-    questionAnteriorIgual: () => boolean;
-}
-
 export const qtdPerguntasPorNivel = 10;
 export const qtdTentativas = 9999;
 export const qtdErrosAceitaveis = 2;
-
 
 const forSub = (q: question) => {
     if(q.firstValue > q.secondValue || q.operation !== op.subtracao) return;
@@ -117,17 +107,18 @@ export const optValores = [
 
 const valoresFactory = (nivel: number): question => optValores[nivel]();
 
-const nivelFactory = (jogo: Jogos): () => void => {
-    if(jogo.nivel >= optValores.length * 3) return () => {};
-    return () => {
-        const q = jogo.getQuestion();
-        const values = valoresFactory(jogo.nivel % optValores.length);
-        q.firstValue = values.firstValue;
-        q.secondValue = values.secondValue;
-        q.operation = Math.floor(jogo.nivel / optValores.length);
-        forSub(q);
-    }
+export const gerarPergunta = (nivel: number): question => {
+    const values = valoresFactory(nivel % optValores.length);
+    let result = {
+        firstValue: values.firstValue,
+        secondValue: values.secondValue,
+        operation: Math.floor(nivel / optValores.length),
+    } as question;
+    
+    forSub(result);
+    return result;
 }
+
 const randomNum = (max: number, min: number) => Math.round(Math.random() * (max - min) + min);
 
 

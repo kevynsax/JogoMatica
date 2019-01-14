@@ -4,27 +4,33 @@ import * as Levels from "../../../Model/Levels";
 import { Home, Lens, PanoramaFishEye } from "@material-ui/icons/";
 import "./GamePlay.scss";
 import { withRouter } from "react-router-dom";
-import Moment, {MomentProps} from "react-moment";
 
 class GamePlay extends Component {
     constructor(props) {
         super(props);
+
+        const { qtdPerguntasPorNivel, gerarPergunta } = Levels;
+        const level = parseInt(props.match.params.level, 10)
+        const questions = Array.from({ length: qtdPerguntasPorNivel }, (a, i) => gerarPergunta(level));
+
         this.state = {
-            questions: Array.from({ length: Levels.qtdPerguntasPorNivel }, (a, i) => ({})),
+            questions,
+            openedQuestion: questions[0],
             isStarted: false,
-            timeHasStarted: new Date()
+            timeHasStarted: new Date(),
+            level
         }
     }
 
     renderStar = indexStar => <GoldenStar key={indexStar} />;
 
-    renderQuestion = (question, i) => {
+    renderFeedBack = (question, i) => {
         const Comp = !!question.answer ? Lens : PanoramaFishEye;
         const style = !!question.answer ? this.rightAnswer(question) === question.answer ? "green" : "red" : "";
         return <Comp key={i} className={style} />
     }
 
-    rightAnswer = ({ firstValue, secondValue, operation }) => {
+    rightAnswer = ({ firstValue, secondValue, operation } = this.state.openedQuestion) => {
         const opt = [
             { op: Levels.op.soma, answer: firstValue + secondValue },
             { op: Levels.op.subtracao, answer: firstValue - secondValue },
@@ -37,7 +43,7 @@ class GamePlay extends Component {
 
     renderTimeBar = () => {
         const color = [
-            "0909fd", "1800d3", "2b00b7", "43008a", "5f0077", 
+            "0909fd", "1800d3", "2b00b7", "43008a", "5f0077",
             "6d0069", "8f004b", "a70037", "cd001d", "ee000d"
         ][Math.floor(this.percentageTime() / 10)];
 
@@ -47,37 +53,51 @@ class GamePlay extends Component {
             "background": `#${color}`
         }
         return (
-            <Moment interval={100}>
-                <div class="timeBar" style={styleBorder}>
-                    <div class="filled" ng-style="ctrl.styleTime()">&nbsp;</div>
-                </div>
-            </Moment>
+            <div class="timeBar" style={styleBorder}>
+                <div class="filled" ng-style="ctrl.styleTime()">&nbsp;</div>
+            </div>
+        )
+    }
+
+    renderOperation = () => {
+        const { openedQuestion } = this.state;
+        const { firstValue, secondValue, operation } = openedQuestion;
+        const labelOperation = [
+            {op: Levels.op.soma, label: "+"},
+            {op: Levels.op.subtracao, label: "-"},
+            {op: Levels.op.multiplicacao, label: "x"},
+            {op: Levels.op.divisao, label: "/"}
+        ].find(a => a.op === operation).label;
+
+        return (
+            <div className="conta">
+                <span>{firstValue}</span>
+                <span>{labelOperation}</span>
+                <span>{secondValue}</span>
+            </div>
         )
     }
 
     render = () => {
         const goHome = () => this.props.history.push("/");
-        const level = parseInt(this.props.match.params.level, 10);
+        const {level} = this.state;
+
         return (
-            <div class="play" ng-if="ctrl.showPlay()">
-                <div class="statusBar">
+            <div className="play" ng-if="ctrl.showPlay()">
+                <div className="statusBar">
                     <Home className="link" onClick={goHome}></Home>
-                    <div class="stars">
+                    <div className="stars">
                         {[1, 2, 3].map(this.renderStar)}
                     </div>
                     <span>{level + 1}</span>
                 </div>
-                <div class="game">
-                    <div class="feedback">
-                        {this.state.questions.map(this.renderQuestion)}
+                <div className="game">
+                    <div className="feedback">
+                        {this.state.questions.map(this.renderFeedBack)}
                     </div>
                     {this.state.isStarted && this.renderTimeBar()}
-                    <div class="operacao">
-                        <div class="conta">
-                            <span ng-bind="ctrl.getQuestion().firstValue"></span>
-                            <span ng-bind="ctrl.labeloperation()"></span>
-                            <span ng-bind="ctrl.getQuestion().secondValue"></span>
-                        </div>
+                    <div className="operacao">
+                        {this.renderOperation()}
                         <input type="number" ng-change="ctrl.handleChangeInput()" ng-model="ctrl.valueResp" />
                     </div>
                 </div>

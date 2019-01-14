@@ -1,12 +1,16 @@
 import React, { Component } from "react";
-import { GoldenStar, DarkStar } from "../utils";
+import { GoldenStar, DarkStar, Star } from "../utils";
 import { withRouter } from "react-router-dom";
 import * as Levels from "../../Model/Levels";
 import "./index.scss";
 
 class Fases extends Component {
-    renderStar = (fase, indexStar) => 
-        this.getConquer(fase) && this.getConquer(fase).stars >= indexStar ? <GoldenStar key={indexStar} /> : <DarkStar key={indexStar} />;
+    renderStar = (fase, indexStar, active) => 
+        active ? 
+            this.getConquer(fase) && this.getConquer(fase).stars >= indexStar
+                ? <GoldenStar key={indexStar} />
+                : <DarkStar key={indexStar} />
+            : <Star key={indexStar} color="#555" />;
 
     getConquer = ({nivel}) => Levels.getConquers().find(a => a.nivel === nivel && a.dif === Levels.getDificulty());
 
@@ -18,7 +22,7 @@ class Fases extends Component {
         return (
             <div key={fase.nivel} className={classLevel} onClick={handleClick.bind(this, fase)}>
                 <div className="stars">
-                    {[1,2,3].map(i => this.renderStar(fase, i))}
+                    {[1,2,3].map(i => this.renderStar(fase, i, levelActive))}
                 </div>
                 <span>{fase.nivel + 1}</span>
             </div>
