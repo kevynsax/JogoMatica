@@ -17,12 +17,10 @@
             font-size: 28px;
         }
         .stars{
-            i{
+            svg{
                 color: #666;
-
-                &.golden{
-                    color: gold;
-                }
+                font-size: 36px;
+                margin: 0 4px;
             }
         }
         span{

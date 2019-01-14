@@ -5,12 +5,20 @@ import Stats from "./Stats";
 
 class Play extends Component{
     state = {
-        playing: true
+        playing: true,
+        haveWin: false,
+        stars: 0
     }
 
-    finishesTheGame = (callback = () => {}) => this.setState({playing: false}, callback)
-
-    render = () => this.state.playing ? <GamePlay finishesTheGame={this.finishesTheGame}/> : <Stats  />;
+    finishesTheGame = (haveWin, stars) => this.setState({playing: false, haveWin, stars});
+    replyGame = callback => {
+        callback();
+        this.setState({playing: true});
+    }
+    render = () => 
+        this.state.playing 
+        ? <GamePlay finishesTheGame={this.finishesTheGame}/> 
+        : <Stats haveWin={this.state.haveWin} stars={this.state.stars} replyGame={this.replyGame} />;
 }
 
 export default withRouter(Play);

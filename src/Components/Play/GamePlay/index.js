@@ -22,6 +22,9 @@ class GamePlay extends Component {
         }
     }
 
+    componentWillUnmount = () => clearInterval(this.intervalObject);
+    setupTimer = () => this.intervalObject = setInterval(() => this.setState({}), 500);
+
     getQuestions = level => {
         const { qtyQuestionsForLevel, gerarPergunta, qtyAttempts } = Levels;
         const questions = Array.from({ length: qtyQuestionsForLevel }, (a, i) => gerarPergunta(level));
@@ -65,9 +68,6 @@ class GamePlay extends Component {
             { op: Levels.op.multiplicacao, answer: firstValue * secondValue },
             { op: Levels.op.divisao, answer: firstValue / secondValue }
         ].find(a => a.op === operation).answer;
-
-    componentWillUnmount = () => clearImmediate(this.intervalObject);
-    setupTimer = () => this.intervalObject = setInterval(() => this.setState({}, () => console.log("passou pelo interval")), 500);
 
     renderTimeBar = () => {
         const { level, timeHasStarted } = this.state;
@@ -142,7 +142,7 @@ class GamePlay extends Component {
         const haveWin = qtySuccess >= (qtyQuestionsForLevel - qtyAceptableErrors);
 
         if(!haveWin){
-            finishesTheGame();
+            finishesTheGame(false, 0);
             return;
         }
 
@@ -159,7 +159,7 @@ class GamePlay extends Component {
         conquers = [conquer, ...conquers.filter(a => !filterConquer(a))];
         setConquers(conquers);
 
-        finishesTheGame();
+        finishesTheGame(true, stars);
     }   
     
     renderOperation = () => {
