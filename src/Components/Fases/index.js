@@ -12,19 +12,19 @@ class Fases extends Component {
                 : <DarkStar key={indexStar} />
             : <Star key={indexStar} color="#555" />;
 
-    getConquer = ({nivel}) => Levels.getConquers().find(a => a.nivel === nivel && a.dif === Levels.getDificulty());
+    getConquer = ({level}) => Levels.getConquers().find(a => a.level === level && a.difficulty === Levels.getDificulty());
 
     renderFase = fase => {
-        const levelActive = Math.max(...Levels.getConquers().filter(a => a.dif === Levels.getDificulty()).map(a => a.nivel)) + 1 >= fase.nivel || fase.nivel === 0
+        const levelActive = Math.max(...Levels.getConquers().filter(a => a.difficulty === Levels.getDificulty()).map(a => a.level)) + 1 >= fase.level || fase.level === 0
         const classLevel = `fase ${levelActive ? "" : "desativado"}`;
-        const handleClick = levelActive ? () => this.props.history.push(`/Play/${fase.nivel}`) : () => {};
+        const handleClick = levelActive ? () => this.props.history.push(`/Play/${fase.level}`) : () => {};
 
         return (
-            <div key={fase.nivel} className={classLevel} onClick={handleClick.bind(this, fase)}>
+            <div key={fase.level} className={classLevel} onClick={handleClick.bind(this, fase)}>
                 <div className="stars">
                     {[1,2,3].map(i => this.renderStar(fase, i, levelActive))}
                 </div>
-                <span>{fase.nivel + 1}</span>
+                <span>{fase.level + 1}</span>
             </div>
         )
     }
@@ -35,16 +35,16 @@ class Fases extends Component {
     }
 
     render = () => {
-        const fases = Array.from({ length: Levels.optValores.length * 4}, (n, i) => ({
-            nivel: i
+        const fases = Array.from({ length: Levels.optValues.length * 4}, (n, i) => ({
+            level: i
         }));
 
         const qtdPontos = Levels.getConquers().map(a => a.stars).reduce((a, b) => a + b, 0);
-
+        const { difficulties } = Levels;
         const labelDificuldade = [
-            { diff: Levels.dificuldades.easy, label: "Fácil" },
-            { diff: Levels.dificuldades.medium, label: "Médio" },
-            { diff: Levels.dificuldades.hard, label: "Dificil" }]
+            { diff: difficulties.easy, label: "Fácil" },
+            { diff: difficulties.medium, label: "Médio" },
+            { diff: difficulties.hard, label: "Dificil" }]
             .find(a => a.diff === Levels.getDificulty()).label || "";
 
         return (

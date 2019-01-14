@@ -1,6 +1,6 @@
 
 export enum op { soma, subtracao, multiplicacao, divisao };
-export enum dificuldades { easy, medium, hard };
+export enum difficulties { easy, medium, hard };
 
 export type question = {
     firstValue: number;
@@ -10,15 +10,14 @@ export type question = {
 }
 
 export type fase = {
-    nivel: number,
-    dif: dificuldades,
-    complete: boolean,
+    level: number,
+    difficulty: difficulties,
     stars: number
 }
 
-export const qtdPerguntasPorNivel = 10;
-export const qtdTentativas = 9999;
-export const qtdErrosAceitaveis = 2;
+export const qtyQuestionsForLevel = 10;
+export const qtyAttempts = 9999;
+export const qtyAceptableErrors = 2;
 
 const forSub = (q: question) => {
     if(q.firstValue > q.secondValue || q.operation !== op.subtracao) return;
@@ -27,92 +26,89 @@ const forSub = (q: question) => {
     q.secondValue = c;
 } 
 
-const nivel1Valores = (): question => {
-    const gerarValores = (): question => ({
+const valuesLevel1 = (): question => {
+    const generateValues = (): question => ({
         firstValue: randomNum(1, 10),
         secondValue: randomNum(1, 10)
     } as question)
-    let q = gerarValores();
+    let q = generateValues();
     let count = 0;
-    while(q.secondValue+q.firstValue > 9 && count < qtdTentativas){
-        gerarValores();
-        count++;
-    }
+    while(q.secondValue+q.firstValue > 9 && count++ < qtyAttempts) generateValues();
     return q;
 }
 
-const nivel2Valores = (): question => ({
+const valuesLevel2 = (): question => ({
     firstValue: randomNum(1, 10),
     secondValue: randomNum(1, 10)
 } as question);
 
-const nivel3Valores = (): question => ({
+const valuesLevel3 = (): question => ({
     firstValue: randomNum(10, 20),
     secondValue: randomNum(5, 10)
 } as question);
 
-const nivel4Valores = (): question => ({
+const valuesLevel4 = (): question => ({
     firstValue: randomNum(10, 20),
     secondValue: randomNum(10, 20)
 } as question);
 
-const nivel5Valores = (): question => ({
+const valuesLevel5 = (): question => ({
     firstValue: randomNum(15, 20),
     secondValue: randomNum(15, 20)
 } as question);
 
-const nivel6Valores = (): question => ({
+const valuesLevel6 = (): question => ({
     firstValue: randomNum(15, 25),
     secondValue: randomNum(15, 25)
 } as question);
 
-const nivel7Valores = (): question => ({
+const valuesLevel7 = (): question => ({
     firstValue: randomNum(11, 50),
     secondValue: randomNum(11, 50)
 } as question)
 
-const nivel8Valores = (): question => ({
+const valuesLevel8 = (): question => ({
     firstValue: randomNum(11, 99),
     secondValue: randomNum(11, 99)
 } as question);
 
-const nivel9Valores = (): question => ({
+const valuesLevel9 = (): question => ({
     firstValue: randomNum(11, 150),
     secondValue: randomNum(11, 50)
 } as question);
 
-const nivel10Valores = (): question => ({
+const valuesLevel10 = (): question => ({
     firstValue: randomNum(11, 150),
     secondValue: randomNum(11, 99)
 } as question)
 
-const nivel11Valores = (): question => ({
+const valuesLevel11 = (): question => ({
     firstValue: randomNum(100, 300),
     secondValue: randomNum(100, 300)
 } as question)
 
-export const optValores = [ 
-    nivel1Valores, 
-    nivel2Valores,
-    nivel3Valores,
-    nivel4Valores,
-    nivel5Valores,
-    nivel6Valores,
-    nivel7Valores,
-    nivel8Valores,
-    nivel9Valores,
-    nivel10Valores,
-    nivel11Valores,
+export const optValues = [ 
+    valuesLevel1, 
+    valuesLevel2,
+    valuesLevel3,
+    valuesLevel4,
+    valuesLevel5,
+    valuesLevel6,
+    valuesLevel7,
+    valuesLevel8,
+    valuesLevel9,
+    valuesLevel10,
+    valuesLevel11,
 ];
 
-const valoresFactory = (nivel: number): question => optValores[nivel]();
+const valoresFactory = (nivel: number): question => optValues[nivel]();
 
 export const gerarPergunta = (nivel: number): question => {
-    const values = valoresFactory(nivel % optValores.length);
+    const values = valoresFactory(nivel % optValues.length);
     let result = {
         firstValue: values.firstValue,
         secondValue: values.secondValue,
-        operation: Math.floor(nivel / optValores.length),
+        operation: Math.floor(nivel / optValues.length),
     } as question;
     
     forSub(result);
@@ -125,5 +121,5 @@ const randomNum = (max: number, min: number) => Math.round(Math.random() * (max 
 export const getConquers = (): fase[] => JSON.parse(localStorage["conquers"] || "[]");
 export const setConquers = (lst: fase[]) => localStorage.setItem("conquers", JSON.stringify(lst));
 
-export const getDificulty = (): dificuldades => JSON.parse(localStorage["dificulty"] || JSON.stringify(dificuldades.easy));
-export const setDificulty = (obj: dificuldades) => localStorage.setItem("dificulty", JSON.stringify(obj));
+export const getDificulty = (): difficulties => JSON.parse(localStorage["dificulty"] || JSON.stringify(difficulties.easy));
+export const setDificulty = (obj: difficulties) => localStorage.setItem("dificulty", JSON.stringify(obj));

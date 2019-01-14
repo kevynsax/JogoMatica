@@ -8,21 +8,49 @@ import { withRouter } from "react-router-dom";
 class GamePlay extends Component {
     constructor(props) {
         super(props);
-
-        const { qtdPerguntasPorNivel, gerarPergunta } = Levels;
         const level = parseInt(props.match.params.level, 10)
-        const questions = Array.from({ length: qtdPerguntasPorNivel }, (a, i) => gerarPergunta(level));
+        const questions = this.getQuestions(level);
 
         this.state = {
             questions,
-            openedQuestion: questions[0],
+            idActualQuestion: 0,
             isStarted: false,
-            timeHasStarted: new Date(),
-            level
+            timeHasStarted: null,
+            level,
+            inputValue: ""
         }
     }
 
-    renderStar = indexStar => <GoldenStar key={indexStar} />;
+    getQuestions = level => {
+        const { qtyQuestionsForLevel, gerarPergunta, qtyAttempts } = Levels;
+        const questions = Array.from({ length: qtyQuestionsForLevel }, (a, i) => gerarPergunta(level));
+
+        let hasDuplicated = false;
+        let count = 0;
+
+        do hasDuplicated = this.takeOutSequenceDuplicated(level, questions, gerarPergunta)
+        while(hasDuplicated && count++ < qtyAttempts);
+        return questions;
+    }
+
+    takeOutSequenceDuplicated = (level, questions, gerarPergunta) => {
+        let hasDuplicated = false;
+        questions.forEach((q, i, arr) => {
+            if(i===0) return;
+            
+            const pq = arr[i-1]; //Previews Question
+            if(pq.firstValue !== q.firstValue || pq.secondValue !== q.firstValue) return;
+            
+            hasDuplicated = true;
+
+            const nq = gerarPergunta(level);
+            q.firstValue = nq.firstValue;
+            q.secondValue = nq.secondValue;
+        });
+        return hasDuplicated;
+    }
+
+    renderStar = indexStar => this.qtdStars() >= indexStar ? <GoldenStar key={indexStar} /> : <GrayStar key={indexStar} />;
 
     renderFeedBack = (question, i) => {
         const Comp = !!question.answer ? Lens : PanoramaFishEye;
@@ -30,18 +58,15 @@ class GamePlay extends Component {
         return <Comp key={i} className={style} />
     }
 
-    rightAnswer = ({ firstValue, secondValue, operation } = this.state.openedQuestion) => {
-        const opt = [
+    rightAnswer = ({ firstValue, secondValue, operation } = this.state.questions[this.state.idActualQuestion]) =>[
             { op: Levels.op.soma, answer: firstValue + secondValue },
             { op: Levels.op.subtracao, answer: firstValue - secondValue },
             { op: Levels.op.multiplicacao, answer: firstValue * secondValue },
             { op: Levels.op.divisao, answer: firstValue / secondValue }
-        ].find(a => a.op === operation);
-
-        return (opt && opt.answer) || 0;
-    }
+        ].find(a => a.op === operation).answer;
 
     renderTimeBar = () => {
+        return <div />;
         const color = [
             "0909fd", "1800d3", "2b00b7", "43008a", "5f0077",
             "6d0069", "8f004b", "a70037", "cd001d", "ee000d"
@@ -59,9 +84,77 @@ class GamePlay extends Component {
         )
     }
 
+    handleChangeInput = event => {
+        const { isStarted, questions } = this.state;
+        let { idActualQuestion } = this.state;
+
+        if(!isStarted)
+            this.setState({ isStarted: true, timeHasStarted: new Date() });
+
+        const value = parseInt(event.target.value, 10);
+        const rightAnswer = this.rightAnswer();
+
+        if(value.toString().length !== rightAnswer.toString().length){
+            this.setState({inputValue: value.toString()});
+            return;
+        }
+
+        const question = questions[idActualQuestion];
+        question.answer = value;
+
+        ++idActualQuestion;
+
+        const qtyErrors = this.state.questions.filter(a => !!a.answer && a.answer !== this.rightAnswer(a)).length
+        if(idActualQuestion === Levels.qtyQuestionsForLevel || qtyErrors > Levels.qtyAceptableErrors){
+            this.endGame();
+            return;
+        }
+
+        this.setState({ inputValue: "", idActualQuestion})
+    }
+
+    qtdStars = () => {
+        const { qtyAceptableErrors, qtyQuestionsForLevel } = Levels;
+
+        const qtyWouldFail = qtyQuestionsForLevel - qtyAceptableErrors - 1;
+        let stars = this.qtySuccess() - qtyWouldFail;
+        stars = stars > 3 ? 3 : stars;
+        return stars;
+    }
+
+    qtySuccess = () => this.state.questions.filter(a => a.answer === this.rightAnswer(a)).length;
+
+    endGame = () => {
+        const { qtyAceptableErrors, qtyQuestionsForLevel, getConquers, setConquers, getDificulty } = Levels;
+        const { finishesTheGame } = this.props;
+
+        const qtySuccess = this.qtySuccess();
+        const haveWin = qtySuccess >= (qtyQuestionsForLevel - qtyAceptableErrors);
+
+        if(!haveWin){
+            finishesTheGame();
+            return;
+        }
+
+        const stars = this.qtdStars();
+        const { level } = this.state;
+        const difficulty = getDificulty();
+    
+        const filterConquer = a => a.level === level && a.difficulty === difficulty;
+        let conquers = getConquers();
+        let conquer = conquers.find(filterConquer) || ({ level, stars, difficulty })
+
+        conquer.stars = conquer.stars > stars ? conquer.stars : stars;
+
+        conquers = [conquer, ...conquers.filter(a => !filterConquer(a))];
+        setConquers(conquers);
+
+        finishesTheGame();
+    }   
+    
     renderOperation = () => {
-        const { openedQuestion } = this.state;
-        const { firstValue, secondValue, operation } = openedQuestion;
+        const { questions, idActualQuestion } = this.state;
+        const { firstValue, secondValue, operation } = questions[idActualQuestion];
         const labelOperation = [
             {op: Levels.op.soma, label: "+"},
             {op: Levels.op.subtracao, label: "-"},
@@ -80,7 +173,7 @@ class GamePlay extends Component {
 
     render = () => {
         const goHome = () => this.props.history.push("/");
-        const {level} = this.state;
+        const { level, inputValue } = this.state;
 
         return (
             <div className="play" ng-if="ctrl.showPlay()">
@@ -98,7 +191,7 @@ class GamePlay extends Component {
                     {this.state.isStarted && this.renderTimeBar()}
                     <div className="operacao">
                         {this.renderOperation()}
-                        <input type="number" ng-change="ctrl.handleChangeInput()" ng-model="ctrl.valueResp" />
+                        <input type="number" onChange={this.handleChangeInput} value={inputValue} />
                     </div>
                 </div>
             </div>
