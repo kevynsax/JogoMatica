@@ -1,6 +1,6 @@
 # JogoMática - React
 
-Este é um jogo feito em react para testar suas skills na matemática
+Este é um jogo feito em react para testar suas skills em matemática
 
 ## Example
 
