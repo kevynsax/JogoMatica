@@ -4,6 +4,7 @@ import * as Levels from "../../../Model/Levels";
 import { Home, Lens, PanoramaFishEye } from "@material-ui/icons/";
 import "./GamePlay.scss";
 import { withRouter } from "react-router-dom";
+import * as moment from "moment";
 
 class GamePlay extends Component {
     constructor(props) {
@@ -65,21 +66,30 @@ class GamePlay extends Component {
             { op: Levels.op.divisao, answer: firstValue / secondValue }
         ].find(a => a.op === operation).answer;
 
+    componentWillUnmount = () => clearImmediate(this.intervalObject);
+    setupTimer = () => this.intervalObject = setInterval(() => this.setState({}, () => console.log("passou pelo interval")), 1111500);
+
     renderTimeBar = () => {
-        return <div />;
+        const { level, timeHasStarted } = this.state;
+        const { optValues, qtyQuestionsForLevel } = Levels;
+        const difficulty = Levels.getDificulty();
+
+        const qtyTimeHasPassed = moment().diff(timeHasStarted, "seconds");
+        const totalTimeLevel = [4, 1, .5][difficulty] * ((level % optValues.length) + 1) * qtyQuestionsForLevel
+
+        const percentageTime = qtyTimeHasPassed * 100 / totalTimeLevel;
         const color = [
             "0909fd", "1800d3", "2b00b7", "43008a", "5f0077",
             "6d0069", "8f004b", "a70037", "cd001d", "ee000d"
-        ][Math.floor(this.percentageTime() / 10)];
+        ][Math.floor(percentageTime / 10)];
 
-        const styleBorder = { border: `2px solid #${color}` };
         const styleFilledTimeBar = {
-            "width": `${100 - Math.round(this.percentageTime())}%`,
+            "width": `${100 - Math.round(percentageTime)}%`,
             "background": `#${color}`
         }
         return (
-            <div class="timeBar" style={styleBorder}>
-                <div class="filled" ng-style="ctrl.styleTime()">&nbsp;</div>
+            <div className="timeBar">
+                <div className="filled" style={styleFilledTimeBar}>&nbsp;</div>
             </div>
         )
     }
@@ -89,7 +99,7 @@ class GamePlay extends Component {
         let { idActualQuestion } = this.state;
 
         if(!isStarted)
-            this.setState({ isStarted: true, timeHasStarted: new Date() });
+            this.setState({ isStarted: true, timeHasStarted: new Date() }, this.setupTimer);
 
         const value = parseInt(event.target.value, 10);
         const rightAnswer = this.rightAnswer();
