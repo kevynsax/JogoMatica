@@ -40,9 +40,10 @@ You can learn more in the [Create React App documentation](https://facebook.gith
 
 To learn React, check out the [React documentation](https://reactjs.org/).
 
-## Authors
+## Contributors
 
-* [**Kevyn Pinheiro Klava**](https://github.com/kevynsax)
+* Author [**Kevyn Pinheiro Klava**](https://github.com/kevynsax)
+* Tester [**Jefferson Sousa**](https://www.linkedin.com/in/jefferson-sousa-58221775)
 
 See also the list of [contributors](https://github.com/kevynsax/Chat/contributors) who participated in this project.
 
