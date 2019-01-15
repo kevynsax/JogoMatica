@@ -45,7 +45,7 @@ To learn React, check out the [React documentation](https://reactjs.org/).
 * Author [**Kevyn Pinheiro Klava**](https://github.com/kevynsax)
 * Tester [**Jefferson Sousa**](https://www.linkedin.com/in/jefferson-sousa-58221775)
 
-See also the list of [contributors](https://github.com/kevynsax/Chat/contributors) who participated in this project.
+See also the list of other [contributors](https://github.com/kevynsax/Chat/contributors) who participated in this project.
 
 ## License
 
