@@ -10,8 +10,8 @@ class Stats extends Component{
     renderStar = (indexStar, qtdStars) => qtdStars >= indexStar ? <GoldenStar key={indexStar} /> : <GrayStar key={indexStar} />;
 
     render = () => {
-        const {stars, haveWin, replyGame, history} = this.props;
-        const level = parseInt(this.props.match.params.level, 10)
+        const {stars, haveWin, replayGame, history} = this.props;
+        const level = parseInt(this.props.match.params.level, 10);
         
         const title = haveWin ? "Você Ganhou!!! :)" : "Você perdeu! :(";
 
@@ -23,12 +23,12 @@ class Stats extends Component{
                         {[1, 2, 3].map(i => this.renderStar(i, stars))}
                     </div>
                 )}
-                <span className="btn buttonAgain" onClick={() => replyGame()}>
+                <span className="btn buttonAgain" onClick={() => replayGame()}>
                     <Autorenew />
                     Novamente
                 </span>
                 {haveWin && (
-                    <span className="btn buttonProximo" onClick={() => replyGame(() => history.push(`/Play/${level+1}`))}>
+                    <span className="btn buttonProximo" onClick={() => replayGame(() => history.push(`/Play/${level+1}`))}>
                         <PlayArrow />
                         Próximo
                     </span>
