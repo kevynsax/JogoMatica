@@ -23,7 +23,12 @@ class GamePlay extends Component {
     }
 
     componentWillUnmount = () => clearInterval(this.intervalObject);
-    setupTimer = () => this.intervalObject = setInterval(() => this.setState({}), 500);
+    setupTimer = () => this.intervalObject = setInterval(this.checkTimeoutAndReRender, 500);
+    
+    checkTimeoutAndReRender = () => {
+        
+        this.setState({});
+    };
 
     getQuestions = level => {
         const { qtyQuestionsForLevel, gerarPergunta, qtyAttempts } = Levels;
@@ -35,7 +40,7 @@ class GamePlay extends Component {
         do hasDuplicated = this.takeOutSequenceDuplicated(level, questions, gerarPergunta)
         while(hasDuplicated && count++ < qtyAttempts);
         return questions;
-    }
+    };
 
     takeOutSequenceDuplicated = (level, questions, gerarPergunta) => {
         let hasDuplicated = false;
@@ -52,7 +57,7 @@ class GamePlay extends Component {
             q.secondValue = nq.secondValue;
         });
         return hasDuplicated;
-    }
+    };
 
     renderStar = indexStar => this.qtdStars() >= indexStar ? <GoldenStar key={indexStar} /> : <GrayStar key={indexStar} />;
 
@@ -60,14 +65,14 @@ class GamePlay extends Component {
         const Comp = !!question.answer ? Lens : PanoramaFishEye;
         const style = !!question.answer ? this.rightAnswer(question) === question.answer ? "green" : "red" : "";
         return <Comp key={i} className={style} />
-    }
+    };
 
     rightAnswer = ({ firstValue, secondValue, operation } = this.state.questions[this.state.idActualQuestion]) =>[
-            { op: Levels.op.soma, answer: firstValue + secondValue },
-            { op: Levels.op.subtracao, answer: firstValue - secondValue },
-            { op: Levels.op.multiplicacao, answer: firstValue * secondValue },
-            { op: Levels.op.divisao, answer: firstValue / secondValue }
-        ].find(a => a.op === operation).answer;
+        { op: Levels.op.soma, answer: firstValue + secondValue },
+        { op: Levels.op.subtracao, answer: firstValue - secondValue },
+        { op: Levels.op.multiplicacao, answer: firstValue * secondValue },
+        { op: Levels.op.divisao, answer: firstValue / secondValue }
+    ].find(a => a.op === operation).answer;
 
     renderTimeBar = () => {
         const { level, timeHasStarted } = this.state;
@@ -75,8 +80,7 @@ class GamePlay extends Component {
         const difficulty = Levels.getDificulty();
 
         const qtyTimeHasPassed = moment().diff(timeHasStarted, "seconds");
-        const totalTimeLevel = [4, 1, .5][difficulty] * ((level % optValues.length) + 1) * qtyQuestionsForLevel
-
+        const totalTimeLevel = [4, 1, .5][difficulty] * ((level % optValues.length) + 1) * qtyQuestionsForLevel;
         const percentageTime = qtyTimeHasPassed * 100 / totalTimeLevel;
         const color = [
             "0909fd", "1800d3", "2b00b7", "43008a", "5f0077",
@@ -86,13 +90,13 @@ class GamePlay extends Component {
         const styleFilledTimeBar = {
             "width": `${100 - Math.round(percentageTime)}%`,
             "background": `#${color}`
-        }
+        };
         return (
             <div className="timeBar">
                 <div className="filled" style={styleFilledTimeBar}>&nbsp;</div>
             </div>
         )
-    }
+    };
 
     handleChangeInput = event => {
         const { isStarted, questions } = this.state;
@@ -121,7 +125,7 @@ class GamePlay extends Component {
         }
 
         this.setState({ inputValue: "", idActualQuestion})
-    }
+    };
 
     qtdStars = () => {
         const { qtyAceptableErrors, qtyQuestionsForLevel } = Levels;
@@ -130,7 +134,7 @@ class GamePlay extends Component {
         let stars = this.qtySuccess() - qtyWouldFail;
         stars = stars > 3 ? 3 : stars;
         return stars;
-    }
+    };
 
     qtySuccess = () => this.state.questions.filter(a => a.answer === this.rightAnswer(a)).length;
 
@@ -160,7 +164,7 @@ class GamePlay extends Component {
         setConquers(conquers);
 
         finishesTheGame(true, stars);
-    }   
+    };
     
     renderOperation = () => {
         const { questions, idActualQuestion } = this.state;
@@ -179,7 +183,7 @@ class GamePlay extends Component {
                 <span>{secondValue}</span>
             </div>
         )
-    }
+    };
 
     render = () => {
         const goHome = () => this.props.history.push("/");
