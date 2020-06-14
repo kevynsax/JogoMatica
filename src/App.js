@@ -6,7 +6,7 @@ import Play from "./Components/Play";
 
 class App extends Component {
   render = () => (
-    <Router>
+    <Router >
       <Fragment>
       <Route exact path="" component={Fases}></Route>
       <Route path="/Play/:level" component={Play}></Route>
