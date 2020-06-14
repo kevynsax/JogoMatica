@@ -8,7 +8,7 @@ class App extends Component {
   render = () => {
       const isProduction = process.env.NODE_ENV === 'production';
       return (
-          <Router basename={isProduction ? '/jogo-matica' : ''}>
+          <Router basename={isProduction ? '/jogomatica' : ''}>
               <Fragment>
                   <Route exact path="" component={Fases}></Route>
                   <Route path="/Play/:level" component={Play}></Route>
