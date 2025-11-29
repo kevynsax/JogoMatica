@@ -1,26 +1,26 @@
-import React, {Component} from "react";
-import {withRouter} from "react-router-dom";
+import React, {useState} from "react";
 import GamePlay from "./GamePlay";
 import Stats from "./Stats";
 
-class Play extends Component {
-    state = {
-        playing: true,
-        haveWin: false,
-        stars: 0
+const Play = () => {
+    const [playing, setPlaying] = useState(true);
+    const [haveWin, setHaveWin] = useState(false);
+    const [stars, setStars] = useState(0);
+
+    const finishesTheGame = (win, starCount) => {
+        setPlaying(false);
+        setHaveWin(win);
+        setStars(starCount);
     };
 
-    finishesTheGame = (haveWin, stars) => this.setState({playing: false, haveWin, stars});
-    replayGame = callback => {
-        if (!!callback)
-            callback();
-        this.setState({playing: true});
+    const replayGame = callback => {
+        if (callback) callback();
+        setPlaying(true);
     };
 
-    render = () =>
-        this.state.playing
-            ? <GamePlay finishesTheGame={this.finishesTheGame}/>
-            : <Stats haveWin={this.state.haveWin} stars={this.state.stars} replayGame={this.replayGame}/>;
-}
+    return playing
+        ? <GamePlay finishesTheGame={finishesTheGame}/>
+        : <Stats haveWin={haveWin} stars={stars} replayGame={replayGame}/>;
+};
 
-export default withRouter(Play);
+export default Play;

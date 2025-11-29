@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import './App.scss';
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Fases from "./Components/Fases";
 import Play from "./Components/Play";
 
@@ -10,8 +10,10 @@ class App extends Component {
       return (
           <Router basename={isProduction ? '/jogomatica' : ''}>
               <Fragment>
-                  <Route exact path="" component={Fases}></Route>
-                  <Route path="/Play/:level" component={Play}></Route>
+                  <Routes>
+                      <Route path="/" element={<Fases />} />
+                      <Route path="/Play/:level" element={<Play />} />
+                  </Routes>
               </Fragment>
           </Router>
       );

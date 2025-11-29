@@ -1,8 +1,8 @@
 import React from "react";
-import MaterialStar from "@material-ui/icons/Star";
+import Star from "@mui/icons-material/Star";
 import "./utils.scss";
 
-export const GoldenStar = props => (<MaterialStar className="goldenStar" />);
-export const GrayStar = props => (<MaterialStar className="grayStar" />);
-export const DarkStar = props => (<MaterialStar className="darkStar" />);
-export const Star = props => (<MaterialStar style={{color: props.color}} />)
+export const GoldenStar = () => (<Star className="goldenStar" />);
+export const GrayStar = () => (<Star className="grayStar" />);
+export const DarkStar = () => (<Star className="darkStar" />);
+export const StarIcon = () => (<Star style={{color: "#555"}} />)

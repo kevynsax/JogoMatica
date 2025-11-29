@@ -1,48 +1,47 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { GoldenStar, GrayStar } from "../../utils";
 import * as Levels from "../../../Model/Levels";
-import { Home, Lens, PanoramaFishEye } from "@material-ui/icons/";
+import Home from "@mui/icons-material/Home";
+import Lens from "@mui/icons-material/Lens";
+import PanoramaFishEye from "@mui/icons-material/PanoramaFishEye";
 import "./GamePlay.scss";
-import { withRouter } from "react-router-dom";
-import * as moment from "moment";
+import { differenceInSeconds } from "date-fns";
 
-class GamePlay extends Component {
-    constructor(props) {
-        super(props);
-        const level = parseInt(props.match.params.level, 10)
-        const questions = this.getQuestions(level);
+const GamePlay = ({ finishesTheGame }) => {
+    const navigate = useNavigate();
+    const { level } = useParams();
+    const levelNum = parseInt(level, 10);
+    const [questions, setQuestions] = useState(() => getQuestions(levelNum));
+    const [idActualQuestion, setIdActualQuestion] = useState(0);
+    const [isStarted, setIsStarted] = useState(false);
+    const [timeHasStarted, setTimeHasStarted] = useState(null);
+    const [inputValue, setInputValue] = useState("");
 
-        this.state = {
-            questions,
-            idActualQuestion: 0,
-            isStarted: false,
-            timeHasStarted: null,
-            level,
-            inputValue: ""
+    useEffect(() => {
+        let interval;
+        if (isStarted) {
+            interval = setInterval(() => {
+                // Force re-render
+                setQuestions([...questions]);
+            }, 500);
         }
-    }
+        return () => clearInterval(interval);
+    }, [isStarted, questions]);
 
-    componentWillUnmount = () => clearInterval(this.intervalObject);
-    setupTimer = () => this.intervalObject = setInterval(this.checkTimeoutAndReRender, 500);
-    
-    checkTimeoutAndReRender = () => {
-        
-        this.setState({});
-    };
-
-    getQuestions = level => {
+    function getQuestions(level) {
         const { qtyQuestionsForLevel, gerarPergunta, qtyAttempts } = Levels;
-        const questions = Array.from({ length: qtyQuestionsForLevel }, (a, i) => gerarPergunta(level));
+        const questions = Array.from({ length: qtyQuestionsForLevel }, () => gerarPergunta(level));
 
         let hasDuplicated = false;
         let count = 0;
 
-        do hasDuplicated = this.takeOutSequenceDuplicated(level, questions, gerarPergunta)
+        do hasDuplicated = takeOutSequenceDuplicated(level, questions, gerarPergunta)
         while(hasDuplicated && count++ < qtyAttempts);
         return questions;
-    };
+    }
 
-    takeOutSequenceDuplicated = (level, questions, gerarPergunta) => {
+    function takeOutSequenceDuplicated(level, questions, gerarPergunta) {
         let hasDuplicated = false;
         questions.forEach((q, i, arr) => {
             if(i===0) return;
@@ -57,30 +56,29 @@ class GamePlay extends Component {
             q.secondValue = nq.secondValue;
         });
         return hasDuplicated;
-    };
+    }
 
-    renderStar = indexStar => this.qtdStars() >= indexStar ? <GoldenStar key={indexStar} /> : <GrayStar key={indexStar} />;
+    const renderStar = indexStar => qtdStars() >= indexStar ? <GoldenStar key={indexStar} /> : <GrayStar key={indexStar} />;
 
-    renderFeedBack = (question, i) => {
+    const renderFeedBack = (question, i) => {
         const Comp = !!question.answer ? Lens : PanoramaFishEye;
-        const style = !!question.answer ? this.rightAnswer(question) === question.answer ? "green" : "red" : "";
+        const style = !!question.answer ? rightAnswer(question) === question.answer ? "green" : "red" : "";
         return <Comp key={i} className={style} />
     };
 
-    rightAnswer = ({ firstValue, secondValue, operation } = this.state.questions[this.state.idActualQuestion]) =>[
-        { op: Levels.op.soma, answer: firstValue + secondValue },
-        { op: Levels.op.subtracao, answer: firstValue - secondValue },
-        { op: Levels.op.multiplicacao, answer: firstValue * secondValue },
-        { op: Levels.op.divisao, answer: firstValue / secondValue }
-    ].find(a => a.op === operation).answer;
+    const rightAnswer = (question = questions[idActualQuestion]) => [
+        { op: Levels.op.soma, answer: question.firstValue + question.secondValue },
+        { op: Levels.op.subtracao, answer: question.firstValue - question.secondValue },
+        { op: Levels.op.multiplicacao, answer: question.firstValue * question.secondValue },
+        { op: Levels.op.divisao, answer: question.firstValue / question.secondValue }
+    ].find(a => a.op === question.operation).answer;
 
-    renderTimeBar = () => {
-        const { level, timeHasStarted } = this.state;
+    const renderTimeBar = () => {
         const { optValues, qtyQuestionsForLevel } = Levels;
         const difficulty = Levels.getDificulty();
 
-        const qtyTimeHasPassed = moment().diff(timeHasStarted, "seconds");
-        const totalTimeLevel = [4, 1, .5][difficulty] * ((level % optValues.length) + 1) * qtyQuestionsForLevel;
+        const qtyTimeHasPassed = differenceInSeconds(new Date(), timeHasStarted);
+        const totalTimeLevel = [4, 1, .5][difficulty] * ((levelNum % optValues.length) + 1) * qtyQuestionsForLevel;
         const percentageTime = qtyTimeHasPassed * 100 / totalTimeLevel;
         const color = [
             "0909fd", "1800d3", "2b00b7", "43008a", "5f0077",
@@ -98,65 +96,63 @@ class GamePlay extends Component {
         )
     };
 
-    handleChangeInput = event => {
-        const { isStarted, questions } = this.state;
-        let { idActualQuestion } = this.state;
-
-        if(!isStarted)
-            this.setState({ isStarted: true, timeHasStarted: new Date() }, this.setupTimer);
+    const handleChangeInput = event => {
+        if(!isStarted) {
+            setIsStarted(true);
+            setTimeHasStarted(new Date());
+        }
 
         const value = parseInt(event.target.value, 10);
-        const rightAnswer = this.rightAnswer();
+        const rightAnswerVal = rightAnswer();
 
-        if(value.toString().length !== rightAnswer.toString().length){
-            this.setState({inputValue: value.toString()});
+        if(value.toString().length !== rightAnswerVal.toString().length){
+            setInputValue(value.toString());
             return;
         }
 
         const question = questions[idActualQuestion];
         question.answer = value;
 
-        ++idActualQuestion;
+        const newId = idActualQuestion + 1;
 
-        const qtyErrors = this.state.questions.filter(a => !!a.answer && a.answer !== this.rightAnswer(a)).length
-        if(idActualQuestion === Levels.qtyQuestionsForLevel || qtyErrors > Levels.qtyAceptableErrors){
-            this.endGame();
+        const qtyErrors = questions.filter(a => !!a.answer && a.answer !== rightAnswer(a)).length
+        if(newId === Levels.qtyQuestionsForLevel || qtyErrors > Levels.qtyAceptableErrors){
+            endGame();
             return;
         }
 
-        this.setState({ inputValue: "", idActualQuestion})
+        setInputValue("");
+        setIdActualQuestion(newId);
     };
 
-    qtdStars = () => {
+    const qtdStars = () => {
         const { qtyAceptableErrors, qtyQuestionsForLevel } = Levels;
 
         const qtyWouldFail = qtyQuestionsForLevel - qtyAceptableErrors - 1;
-        let stars = this.qtySuccess() - qtyWouldFail;
+        let stars = qtySuccess() - qtyWouldFail;
         stars = stars > 3 ? 3 : stars;
         return stars;
     };
 
-    qtySuccess = () => this.state.questions.filter(a => a.answer === this.rightAnswer(a)).length;
+    const qtySuccess = () => questions.filter(a => a.answer === rightAnswer(a)).length;
 
-    endGame = () => {
+    const endGame = () => {
         const { qtyAceptableErrors, qtyQuestionsForLevel, getConquers, setConquers, getDificulty } = Levels;
-        const { finishesTheGame } = this.props;
 
-        const qtySuccess = this.qtySuccess();
-        const haveWin = qtySuccess >= (qtyQuestionsForLevel - qtyAceptableErrors);
+        const qtySuccessVal = qtySuccess();
+        const haveWin = qtySuccessVal >= (qtyQuestionsForLevel - qtyAceptableErrors);
 
         if(!haveWin){
             finishesTheGame(false, 0);
             return;
         }
 
-        const stars = this.qtdStars();
-        const { level } = this.state;
+        const stars = qtdStars();
         const difficulty = getDificulty();
     
-        const filterConquer = a => a.level === level && a.difficulty === difficulty;
+        const filterConquer = a => a.level === levelNum && a.difficulty === difficulty;
         let conquers = getConquers();
-        let conquer = conquers.find(filterConquer) || ({ level, stars, difficulty })
+        let conquer = conquers.find(filterConquer) || ({ level: levelNum, stars, difficulty })
 
         conquer.stars = conquer.stars > stars ? conquer.stars : stars;
 
@@ -166,8 +162,7 @@ class GamePlay extends Component {
         finishesTheGame(true, stars);
     };
     
-    renderOperation = () => {
-        const { questions, idActualQuestion } = this.state;
+    const renderOperation = () => {
         const { firstValue, secondValue, operation } = questions[idActualQuestion];
         const labelOperation = [
             {op: Levels.op.soma, label: "+"},
@@ -185,32 +180,29 @@ class GamePlay extends Component {
         )
     };
 
-    render = () => {
-        const goHome = () => this.props.history.push("/");
-        const { level, inputValue } = this.state;
+    const goHome = () => navigate("/");
 
-        return (
-            <div className="play" ng-if="ctrl.showPlay()">
-                <div className="statusBar">
-                    <Home className="link" onClick={goHome}></Home>
-                    <div className="stars">
-                        {[1, 2, 3].map(this.renderStar)}
-                    </div>
-                    <span>{level + 1}</span>
+    return (
+        <div className="play">
+            <div className="statusBar">
+                <Home className="link" onClick={goHome}></Home>
+                <div className="stars">
+                    {[1, 2, 3].map(renderStar)}
                 </div>
-                <div className="game">
-                    <div className="feedback">
-                        {this.state.questions.map(this.renderFeedBack)}
-                    </div>
-                    {this.state.isStarted && this.renderTimeBar()}
-                    <div className="operacao">
-                        {this.renderOperation()}
-                        <input type="number" onChange={this.handleChangeInput} value={inputValue} />
-                    </div>
+                <span>{levelNum + 1}</span>
+            </div>
+            <div className="game">
+                <div className="feedback">
+                    {questions.map(renderFeedBack)}
+                </div>
+                {isStarted && renderTimeBar()}
+                <div className="operacao">
+                    {renderOperation()}
+                    <input type="number" onChange={handleChangeInput} value={inputValue} />
                 </div>
             </div>
-        )
-    }
-}
+        </div>
+    )
+};
 
-export default withRouter(GamePlay);
+export default GamePlay;
